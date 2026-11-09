@@ -30,15 +30,25 @@ jobs:
           unzip InstagramDMOnly.zip -d project
           find project -maxdepth 3 -type f
 
+
       - name: Build APK
         run: |
-          cd project
+          ROOT=$(find project -name settings.gradle -o -name settings.gradle.kts | head -n 1)
+          if [ -z "$ROOT" ]; then
+            echo "ERROR: Gradle settings file not found"
+            exit 1
+          fi
+
+          cd "$(dirname "$ROOT")"
+          echo "Building in $(pwd)"
+
           if [ -f gradlew ]; then
             chmod +x gradlew
             ./gradlew assembleDebug --no-daemon
           else
             gradle assembleDebug --no-daemon
           fi
+
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
